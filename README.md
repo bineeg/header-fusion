@@ -3,3 +3,22 @@
 
 <p>To use the extension, log into the application with two different accounts (e.g., User A and User B). Collect the relevant access control headers (e.g., <code>X-Header-Name: Value</code>) and configure them in the extension's UI. Then, send the request to the extension to automate the header swapping.</p>
 
+<h2>How to Configure config.json</h2>
+
+Paste the access control headers in JSON/dictionary format using the following structure.
+
+```json
+[
+    {
+        "userA": {
+            "Header": "Value",
+            "Header2": "Value2"
+        }
+    },
+    {
+        "userB": {
+            "Header": "Value",
+            "Header2": "Value2"
+        }
+    }
+]
