@@ -1,0 +1,12 @@
+[
+    {
+        "userA": {
+            "Header": "Value"
+        }
+    },
+    {
+        "userB": {
+            "Header": "Value"
+        }
+    }
+]
