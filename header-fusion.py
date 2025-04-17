@@ -9,6 +9,7 @@ from java.io import PrintWriter
 import threading
 import itertools
 import time
+from java.io import File
 
 userA = {
 
@@ -27,7 +28,7 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
 
         callbacks.setExtensionName("Header Fusion")
         self.stdout = PrintWriter(callbacks.getStdout(), True)
-        self.stdout.println("Header Fusion v1.0\nExtension Loaded")
+        self.stdout.println("Header Fusion v2.0\nExtension Loaded\n\nAuthors\n\t- Bineeg\n\t- Amal Thamban")
 
         # Create database
         self._dbA = MatrixDB(userA)
@@ -49,9 +50,9 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
 
         # Create buttons for adding new headers, saving, loading, and clearing headers
         self._newUserAButton = JButton(
-            "New User A", actionPerformed=self.getInputUserAClick)
+            "Add headers of User A", actionPerformed=self.getInputUserAClick)
         self._newUserBButton = JButton(
-            "New User B", actionPerformed=self.getInputUserBClick)
+            "Add headers of User B", actionPerformed=self.getInputUserBClick)
         self._saveButton = JButton("Save", actionPerformed=self.saveClick)
         self._loadButton = JButton("Load", actionPerformed=self.loadClick)
         self._clearButton = JButton("Clear", actionPerformed=self.clearClick)
@@ -110,7 +111,7 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
 
     def saveClick(self, event):
         # Handle saving user data to a file
-        options = ["User A", "User B"]
+        options = ["User B", "User A"]
         choice = JOptionPane.showOptionDialog(
             self.mainPanel,
             "Select the user data to save:",
@@ -121,24 +122,25 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
             options,
             options[0]
         )
-        if choice == 0:  # User A selected
+        if choice == 1:  # User A selected
             self.saveHeaders(userA, "UserA_Headers.txt")
-        elif choice == 1:  # User B selected
+        elif choice == 0:  # User B selected
             self.saveHeaders(userB, "UserB_Headers.txt")
 
     def saveHeaders(self, user_dict, default_filename):
-        # Save the headers to a specified file
         fileChooser = JFileChooser()
-        fileChooser.setSelectedFile(java.io.File(
-            default_filename))  # Set a default filename
-        returnVal = fileChooser.showSaveDialog(self.mainPanel)
+        fileChooser.setSelectedFile(
+            File(default_filename))
+        returnVal = fileChooser.showSaveDialog(
+            self.mainPanel)
+
         if returnVal == JFileChooser.APPROVE_OPTION:
             selectedFile = fileChooser.getSelectedFile()
             try:
-                # Write headers to the selected file
                 with open(selectedFile.getAbsolutePath(), 'w') as file:
                     for key, value in user_dict.items():
                         file.write('"{}": "{}",\n'.format(key, value))
+
                 JOptionPane.showMessageDialog(
                     self.mainPanel, "Data saved successfully to {}".format(selectedFile.getName()))
             except Exception as ex:
@@ -146,8 +148,7 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
                     self.mainPanel, "Error saving file: " + str(ex))
 
     def loadClick(self, event):
-        # Handle loading user data from a file
-        options = ["User A", "User B"]
+        options = ["User B", "User A"]
         choice = JOptionPane.showOptionDialog(
             self.mainPanel,
             "Select the user to load headers:",
@@ -158,9 +159,9 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
             options,
             options[0]
         )
-        if choice == 0:  # User A selected
+        if choice == 1:  # User A selected
             self.loadHeaders(userA, self._userATable)
-        elif choice == 1:  # User B selected
+        elif choice == 0:  # User B selected
             self.loadHeaders(userB, self._userBTable)
 
     def loadHeaders(self, user_dict, table):
@@ -170,12 +171,11 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
         if returnVal == JFileChooser.APPROVE_OPTION:
             selectedFile = fileChooser.getSelectedFile()
             try:
-                user_dict.clear()  # Clear existing headers before loading
+                user_dict.clear()  
                 with open(selectedFile.getAbsolutePath(), 'r') as file:
                     for line in file:
                         try:
                             if ":" in line:
-                                # Split line into header name and value
                                 headerName, headerValue = line.split(":", 1)
                                 user_dict[headerName.strip().replace('"', '')] = headerValue.strip().replace(
                                     ',', '').replace('"', '')
@@ -190,7 +190,7 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
 
     def clearClick(self, event):
         # Handle clearing user data
-        options = ["User A", "User B"]
+        options = ["User B", "User A"]
         choice = JOptionPane.showOptionDialog(
             self.mainPanel,
             "Select the user data to clear:",
@@ -201,16 +201,16 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
             options,
             options[0]
         )
-        if choice == 0:  # User A selected
+        if choice == 1:  # User A selected
             userA.clear()
-            self._dbA.updateData(userA)  # Update data model
-            self._userATable.redrawTable()  # Refresh UI
+            self._dbA.updateData(userA)  
+            self._userATable.redrawTable()  
             JOptionPane.showMessageDialog(
                 self.mainPanel, "User A data cleared.")
-        elif choice == 1:  # User B selected
-            userB.clear()  # Clear User B's data
-            self._dbB.updateData(userB)  # Update data model
-            self._userBTable.redrawTable()  # Refresh UI
+        elif choice == 0:  
+            userB.clear() 
+            self._dbB.updateData(userB)  
+            self._userBTable.redrawTable()  
             JOptionPane.showMessageDialog(
                 self.mainPanel, "User B data cleared.")
 
@@ -228,7 +228,6 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
 
 
 # capture each request sending to the tool
-
 
     def _handle_request(self, invocation):
 
@@ -256,7 +255,6 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
                     except Exception as e:
                         self.stdout.println(e)
 
-                # convert list to dict
                 def list_to_dict(temp_headers):
                     temp_dict = {}
                     try:
@@ -268,7 +266,7 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
                         return temp_dict
                     except Exception as e:
                         self.stdout.println(
-                            "Error printing headers: " + str(e))
+                            "Error in conversion: " + str(e))
 
                 for header in headers:
                     if any(header.lower().startswith(prefix.lower()) for prefix in prefix_list):
@@ -315,15 +313,11 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
                     c = {}
                     all = []
                     if any(value in userA.values() for value in mod_headers_dict.values()):
-                        self.stdout.println(
-                            "\nRequest from user A \nAttack started for : " + str(original_url))
                         reduce_ref = dict_reduce(userB, mod_headers_dict)
                         c = combination(reduce_ref, mod_headers_dict)
                         all = combine_headers(c)
 
                     elif any(value in userB.values() for value in mod_headers_dict.values()):
-                        self.stdout.println(
-                            "\nRequest from user B\nAttack started for : " + str(original_url))
                         reduce_ref = dict_reduce(userA, mod_headers_dict)
                         c = combination(reduce_ref, mod_headers_dict)
 
@@ -342,15 +336,10 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
                             response_info = self._helpers.analyzeResponse(
                                 response.getResponse())
                             response_code = response_info.getStatusCode()
-                            self.stdout.println(
-                                "\tModified request sent. Response code: " + str(response_code))
                         except Exception as e:
                             self.stdout.println(
                                 "Error sending modified request: " + str(e))
                         time.sleep(1)
-                else:
-                    self.stdout.println(
-                        "No Headers to swap for "+str(original_url)+"\n")
                 break
 
 
