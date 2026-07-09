@@ -1,0 +1,18 @@
+# Gradle build and cache files
+.gradle/
+build/
+
+# IntelliJ IDEA settings and outputs
+.idea/
+*.iml
+out/
+
+# Local backup / configurations (User-specific data)
+HeaderFusion_Config.json
+UserA_Headers.txt
+UserB_Headers.txt
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
